@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Blog Siaran Langsung</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #00ffcc;
+    }
+    .channel-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .channel {
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      overflow: hidden;
+      width: 120px;
+      transition: all 0.3s ease;
+    }
+    .channel:hover, .channel.active {
+      border-color: #00ffcc;
+      transform: scale(1.05);
+    }
+    .channel img {
+      width: 100%;
+      display: block;
+    }
+    .channel-name {
+      padding: 5px;
+      background: #222;
+      font-size: 14px;
+    }
+    video {
+      width: 90%;
+      max-width: 720px;
+      border: 4px solid #00ffcc;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Siaran Langsung</h1>
+
+  <div class="channel-list" id="channelList">
+    <!-- Channel akan dimasukkan secara dinamik -->
+  </div>
+
+  <video id="video" controls autoplay></video>
+
+  <script>
+    const channels = [
+      {
+        name: 'TV1',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/TV1_2021.svg/320px-TV1_2021.svg.png',
+        url: 'https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index.m3u8'
+      },
+      {
+        name: 'TV2',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/TV2_2021.svg/320px-TV2_2021.svg.png',
+        url: 'https://m3u8.sooka.my/live/smil:tv2.smil/playlist.m3u8'
+      },
+      {
+        name: 'TV3',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/TV3_Malaysia_2021.svg/320px-TV3_Malaysia_2021.svg.png',
+        url: 'https://m3u8.sooka.my/live/smil:tv3.smil/playlist.m3u8'
+      }
+      // Tambah lagi channel di sini jika perlu
+    ];
+
+    const channelList = document.getElementById('channelList');
+    const video = document.getElementById('video');
+
+    function loadChannel(url) {
+      if (Hls.isSupported()) {
+        if (window.hls) {
+          window.hls.destroy();
+        }
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        window.hls = hls;
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+      } else {
+        alert("Browser tidak menyokong HLS");
+      }
+    }
+
+    channels.forEach((ch, index) => {
+      const div = document.createElement('div');
+      div.className = 'channel';
+      div.innerHTML = `
+        <img src="${ch.logo}" alt="${ch.name}">
+        <div class="channel-name">${ch.name}</div>
+      `;
+      div.addEventListener('click', () => {
+        document.querySelectorAll('.channel').forEach(c => c.classList.remove('active'));
+        div.classList.add('active');
+        loadChannel(ch.url);
+      });
+      if (index === 0) {
+        div.classList.add('active');
+        loadChannel(ch.url);
+      }
+      channelList.appendChild(div);
+    });
+  </script>
+
+</body>
+</html>
